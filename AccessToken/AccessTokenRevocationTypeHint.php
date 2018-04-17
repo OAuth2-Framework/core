@@ -14,10 +14,9 @@ declare(strict_types=1);
 namespace OAuth2Framework\Component\Core\AccessToken;
 
 use OAuth2Framework\Component\Core\Token\Token;
-use OAuth2Framework\Component\TokenIntrospectionEndpoint\TokenTypeHint as IntrospectionTokenTypeHint;
-use OAuth2Framework\Component\TokenRevocationEndpoint\TokenTypeHint as RevocationTokenTypeHint;
+use OAuth2Framework\Component\TokenRevocationEndpoint\TokenTypeHint;
 
-class AccessTokenTypeHint implements IntrospectionTokenTypeHint, RevocationTokenTypeHint
+class AccessTokenRevocationTypeHint implements TokenTypeHint
 {
     /**
      * @var AccessTokenRepository
@@ -50,30 +49,6 @@ class AccessTokenTypeHint implements IntrospectionTokenTypeHint, RevocationToken
         $id = AccessTokenId::create($token);
 
         return $this->accessTokenRepository->find($id);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function introspect(Token $token): array
-    {
-        if (!$token instanceof AccessToken || true === $token->isRevoked()) {
-            return [
-                'active' => false,
-            ];
-        }
-
-        $values = [
-            'active' => !$token->hasExpired(),
-            'client_id' => $token->getClientId(),
-            'resource_owner' => $token->getResourceOwnerId(),
-            'expires_in' => $token->getExpiresIn(),
-        ];
-        if (!$token->hasParameter('scope')) {
-            $values['scope'] = $token->getParameter('scope');
-        }
-
-        return $values + $token->getParameters()->all();
     }
 
     /**
