@@ -11,28 +11,22 @@ declare(strict_types=1);
  * of the MIT license.  See the LICENSE file for details.
  */
 
-namespace OAuth2Framework\Component\Core\Response;
+namespace OAuth2Framework\Component\Core\Message\Factory;
 
 use Psr\Http\Message\ResponseInterface;
 
-interface OAuth2ResponseInterface
+interface ResponseFactory
 {
     /**
-     * Get the response code.
-     *
      * @return int
      */
-    public function getCode(): int;
+    public function getSupportedCode(): int;
 
     /**
-     * Get the OAuth2 Response as a PSR-7 Response object.
+     * @param array $data       Data sent to the response
+     * @param ResponseInterface $response
      *
      * @return ResponseInterface
      */
-    public function getResponse(): ResponseInterface;
-
-    /**
-     * @return array
-     */
-    public function getData();
+    public function createResponse(array $data, ResponseInterface $response): ResponseInterface;
 }

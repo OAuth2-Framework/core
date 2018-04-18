@@ -11,15 +11,15 @@ declare(strict_types=1);
  * of the MIT license.  See the LICENSE file for details.
  */
 
-namespace OAuth2Framework\Component\Core\Response;
+namespace OAuth2Framework\Component\Core\Message;
 
-interface Extension
+interface MessageExtension
 {
     /**
-     * @param int   $code The code of the response
-     * @param array $data Data that will be sent
+     * @param OAuth2Message $code The code of the response
+     * @param array           $data Data that will be sent
      *
      * @return array
      */
-    public function process(int $code, array $data): array;
+    public function process(OAuth2Message $code, array $data): array;
 }

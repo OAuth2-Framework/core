@@ -11,9 +11,9 @@ declare(strict_types=1);
  * of the MIT license.  See the LICENSE file for details.
  */
 
-namespace OAuth2Framework\Component\Core\Exception;
+namespace OAuth2Framework\Component\Core\Message;
 
-class OAuth2Exception extends \Exception
+class OAuth2Message extends \Exception
 {
     //Error messages from the RFC5749
     public const ERROR_INVALID_REQUEST = 'invalid_request';
@@ -72,7 +72,7 @@ class OAuth2Exception extends \Exception
     private $errorDescription;
 
     /**
-     * OAuth2Exception constructor.
+     * oauth2Message constructor.
      *
      * @param int             $code
      * @param string          $error

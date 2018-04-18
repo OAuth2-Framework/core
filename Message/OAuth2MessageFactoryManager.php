@@ -11,16 +11,16 @@ declare(strict_types=1);
  * of the MIT license.  See the LICENSE file for details.
  */
 
-namespace OAuth2Framework\Component\Core\Response;
+namespace OAuth2Framework\Component\Core\Message;
 
 use Http\Message\ResponseFactory as Psr7ResponseFactory;
-use OAuth2Framework\Component\Core\Exception\OAuth2Exception;
-use OAuth2Framework\Component\Core\Response\Factory\ResponseFactory;
+use OAuth2Framework\Component\Core\Message\Factory\ResponseFactory;
+use Psr\Http\Message\ResponseInterface;
 
-class OAuth2ResponseFactoryManager
+class OAuth2MessageFactoryManager
 {
     /**
-     * @var Extension[]
+     * @var MessageExtension[]
      */
     private $extensions = [];
 
@@ -46,51 +46,41 @@ class OAuth2ResponseFactoryManager
 
     /**
      * @param ResponseFactory $responseFactory
-     *
-     * @return OAuth2ResponseFactoryManager
      */
-    public function addResponseFactory(ResponseFactory $responseFactory): self
+    public function addFactory(ResponseFactory $responseFactory)
     {
         $this->responseFactories[$responseFactory->getSupportedCode()] = $responseFactory;
-
-        return $this;
     }
 
     /**
-     * @param Extension $extension
+     * @param MessageExtension $extension
      */
-    public function addExtension(Extension $extension)
+    public function addExtension(MessageExtension $extension)
     {
         $this->extensions[] = $extension;
     }
 
     /**
-     * @param OAuth2Exception $e
+     * @param OAuth2Message $message
+     * @param array $additionalData
      *
-     * @return OAuth2ResponseInterface
+     * @return ResponseInterface
      */
-    public function getResponse(OAuth2Exception $e): OAuth2ResponseInterface
+    public function getResponse(OAuth2Message $message, array $additionalData = []): ResponseInterface
     {
-        $code = $e->getCode();
-        $data = $e->getData();
+        $code = $message->getCode();
+        $data = array_merge(
+            $additionalData,
+            $message->getData()
+        );
         foreach ($this->extensions as $extension) {
-            $data = $extension->process($code, $data);
+            $data = $extension->process($message, $data);
         }
 
-        $factory = $this->getResponseFactory($code);
+        $factory = $this->getFactory($code);
         $response = $this->psr7responseFactory->createResponse($code);
 
         return $factory->createResponse($data, $response);
-    }
-
-    /**
-     * @param int $code The code of the response
-     *
-     * @return bool
-     */
-    public function isResponseCodeSupported(int $code): bool
-    {
-        return array_key_exists($code, $this->responseFactories);
     }
 
     /**
@@ -100,9 +90,9 @@ class OAuth2ResponseFactoryManager
      *
      * @return ResponseFactory
      */
-    private function getResponseFactory(int $code): ResponseFactory
+    private function getFactory(int $code): ResponseFactory
     {
-        if (!$this->isResponseCodeSupported($code)) {
+        if (!array_key_exists($code, $this->responseFactories)) {
             throw new \InvalidArgumentException(sprintf('The response code "%d" is not supported', $code));
         }
 
